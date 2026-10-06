@@ -495,3 +495,85 @@ console.log("");
 console.log("Final balance after " + years + " years: " + formatRand(finalBalance));
 console.log("Total interest earned: " + formatRand(totalInterest));
 console.log("Effective annual rate: " + (effectiveAnnualRate * 100).toFixed(2) + "%");
+
+// ==========================================
+// CHALLENGE 7 - SCENARIO 2: TIERED FEES
+// ==========================================
+
+function calculateFee(balance) {
+    return balance < 1000 ? 25
+         : balance < 5000 ? 50
+         : balance < 25000 ? 75
+         : 0;
+}
+
+[500, 1500, 10000, 50000].forEach(balance => {
+    const fee = calculateFee(balance);
+    console.log(`Balance ${formatRand(balance)} → Fee ${formatRand(fee)}/month → Annual ${formatRand(fee * 12)}`);
+});
+
+/* Output:
+Balance R 500.00 → Fee R 25.00/month → Annual R 300.00
+Balance R 1,500.00 → Fee R 50.00/month → Annual R 600.00
+Balance R 10,000.00 → Fee R 75.00/month → Annual R 900.00
+Balance R 50,000.00 → Fee R 0.00/month → Annual R 0.00
+*/
+
+
+// ==========================================
+// CHALLENGE 7 - SCENARIO 3: CURRENCY CONVERSION
+// ==========================================
+
+const zarAmount = 15750.33;
+const exchangeRate = 18.42;
+const commissionRate = 0.025;
+
+// Commission in ZAR
+const commission = zarAmount * commissionRate;
+
+// ZAR remaining after commission
+const zarAfterCommission = zarAmount - commission;
+
+// Convert to USD
+const usdReceived = zarAfterCommission / exchangeRate;
+
+// Same comma formatting as formatRand, but with a dollar sign
+function formatUSD(value) {
+    const fixed = value.toFixed(2);
+    const [whole, decimal] = fixed.split(".");
+    const withCommas = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return "$" + withCommas + "." + decimal;
+}
+
+console.log("=== Currency Conversion ===");
+console.log("Amount sent: " + formatRand(zarAmount));
+console.log("Exchange rate: 1 USD = R" + exchangeRate.toFixed(2));
+console.log("Commission (2.5%): " + formatRand(commission));
+console.log("After commission: " + formatRand(zarAfterCommission));
+console.log("USD received: " + formatUSD(usdReceived));
+
+/* Output:
+=== Currency Conversion ===
+Amount sent: R 15,750.33
+Exchange rate: 1 USD = R18.42
+Commission (2.5%): R 393.76
+After commission: R 15,356.57
+USD received: $833.69
+*/
+
+/*
+Floating-point answer:
+
+The problem shows up in the commission calculation. 2.5% as 0.025 can't be represented
+exactly in binary, so 15750.33 * 0.025 gives something like 393.75825000000004 in
+the raw number. Then dividing by 18.42 can introduce another tiny rounding error.
+
+I handled it by calling toFixed(2) inside the formatter, which rounds to 2 decimal
+places before doing the string manipulation. That way $833.689... becomes $833.69
+instead of getting sliced off at $833.68.
+
+This is the same thing as 0.1 + 0.2 !== 0.3 from Module 2. Real banks don't store
+R15,750.33 as a float — they store it as 1575033 cents and do integer math, then
+divide by 100 at the very end. If you're building anything that actually handles
+money, you do it in cents, not decimals.
+*/
