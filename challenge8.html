@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Challenge 8 - Membership Form</title>
+</head>
+<body>
+
+<h1>Melsoft Membership Form</h1>
+<p>Check the alerts and prompts.</p>
+
+<script>
+// ==========================================
+// CHALLENGE 8 - DIALOG BOXES
+// ==========================================
+
+// Step 1: Welcome alert
+window.alert("Welcome to the Melsoft membership form!");
+
+// Step 2: Prompt for name, handle blank or cancel
+const rawName = window.prompt("What's your name?");
+const name = rawName && rawName.trim() !== "" ? rawName.trim() : "Guest";
+
+// Step 3: Prompt for age, validate it's a real number between 1 and 120
+const rawAge = window.prompt("How old are you?");
+const age = Number(rawAge);
+
+if (isNaN(age) || age < 1 || age > 120) {
+    window.alert("Invalid age. Please refresh and try again.");
+    // Stop the flow here - don't continue to the summary
+} else {
+    // Step 4: Membership tier via ternary
+    const tier = age < 18 ? "Youth" : age < 60 ? "Adult" : "Senior";
+
+    // Step 5: Confirm newsletter subscription
+    const wantsNewsletter = window.confirm("Subscribe to our newsletter?");
+
+    // Step 6: Final summary alert
+    window.alert(`Name: ${name}\nAge: ${age}\nTier: ${tier}\nNewsletter: ${wantsNewsletter ? "Yes" : "No"}`);
+}
+
+
+/* ==========================================
+   INTERVIEW ANSWERS — DIALOG BOXES
+   ==========================================
+
+1. What does "blocking" mean? Why is it a problem for modern web apps?
+
+   Blocking means the browser freezes while waiting for the user to respond.
+   Nothing else can run. No scrolling, no clicking, no animations. The page
+   is stuck until the dialog closes.
+
+   Modern web apps can't afford that. Users expect smooth, responsive
+   interfaces. A modal that freezes the whole page feels broken. That's why
+   modern apps use custom modals that look like dialogs but don't actually
+   block the browser.
+
+2. What would modern devs use instead?
+
+   Custom HTML/CSS modals. You build a <div> that looks like a dialog, style
+   it, and use JavaScript to show and hide it. Because it's just a normal
+   element, the browser keeps running. You can animate it, style it, add
+   form fields inside it.
+
+   Libraries like SweetAlert do the same thing but save you writing the
+   HTML and CSS yourself.
+
+3. What does prompt() return on Cancel? On blank + OK?
+
+   Cancel returns null. Blank + OK returns an empty string "".
+
+   Those are different, and it matters. If you just check if (rawInput), both
+   null and "" are falsy, so both fall through to your default. But if you're
+   checking specifically for null, you need to know that "" won't match.
+
+   I handled this in Step 2 by checking rawName && rawName.trim() !== "". The
+   first part catches null. The second part catches empty strings and strings
+   that are just spaces.
+*/
+</script>
+
+</body>
+</html>
