@@ -458,3 +458,40 @@ regardless of whether it's the user, address, or city that's missing.
 Technique 3 (?. with ??): Same as technique 2, but provides a fallback value.
 This is the safest for user-facing output.
 */ 
+
+// ==========================================
+// CHALLENGE 7 - SCENARIO 1: SAVINGS INTEREST
+// ==========================================
+
+// Inputs from the brief
+const principal = 25000;          // R25,000 deposit
+const annualRate = 0.075;        // 7.5% annual interest
+const timesCompounded = 12;      // Monthly compounding
+const years = 3;                 // 3-year period
+
+// Compound interest formula: A = P(1 + r/n)^(nt)
+const finalBalance = principal * Math.pow(1 + annualRate / timesCompounded, timesCompounded * years);
+
+// Total interest earned
+const totalInterest = finalBalance - principal;
+
+// Effective annual rate (EAR)
+const effectiveAnnualRate = Math.pow(1 + annualRate / timesCompounded, timesCompounded) - 1;
+
+// Manual formatter — US/UK style: commas for thousands, dot for decimals
+function formatRand(value) {
+    const fixed = value.toFixed(2);              // "31286.15"
+    const [whole, decimal] = fixed.split(".");   // ["31286", "15"]
+    const withCommas = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");  // "31,286"
+    return "R " + withCommas + "." + decimal;    // "R 31,286.15"
+}
+
+console.log("=== Savings Interest Calculator ===");
+console.log("Deposit: " + formatRand(principal));
+console.log("Period: " + years + " years");
+console.log("Annual rate: " + (annualRate * 100).toFixed(1) + "%");
+console.log("Compounded: " + timesCompounded + " times per year");
+console.log("");
+console.log("Final balance after " + years + " years: " + formatRand(finalBalance));
+console.log("Total interest earned: " + formatRand(totalInterest));
+console.log("Effective annual rate: " + (effectiveAnnualRate * 100).toFixed(2) + "%");
