@@ -259,3 +259,202 @@ loose equality (==) performs type coercion. For example, "123" == 123 is true, b
 passwords are strings. Using === ensures both value and type match exactly, preventing 
 accidental matches and security bugs.
 */
+
+// ==========================================
+// PART D: PREDICT OUTPUTS
+// ==========================================
+
+// 1. 0 || "default"
+// Prediction: "default"
+// Why: 0 is falsy, so || returns the second operand
+console.log(1, 0 || "default");
+
+// 2. "" || "fallback"
+// Prediction: "fallback"
+// Why: Empty string is falsy, so || moves to the next value
+console.log(2, "" || "fallback");
+
+// 3. 0 ?? "default"
+// Prediction: 0
+// Why: ?? only falls through on null/undefined, and 0 is a valid value
+console.log(3, 0 ?? "default");
+
+// 4. null ?? "default"
+// Prediction: "default"
+// Why: null triggers the fallback with ??
+console.log(4, null ?? "default");
+
+// 5. undefined ?? "default"
+// Prediction: "default"
+// Why: undefined triggers the fallback with ??
+console.log(5, undefined ?? "default");
+
+// 6. "" ?? "default"
+// Prediction: ""
+// Why: "" is not null/undefined, so ?? keeps it
+console.log(6, "" ?? "default");
+
+// 7. "hi" && "bye"
+// Prediction: "bye"
+// Why: "hi" is truthy, so && returns the second operand
+console.log(7, "hi" && "bye");
+
+// 8. 0 && "bye"
+// Prediction: 0
+// Why: 0 is falsy, so && short-circuits and returns 0
+console.log(8, 0 && "bye");
+
+// 9. true ? "yes" : "no"
+// Prediction: "yes"
+// Why: condition is true, so the first branch runs
+console.log(9, true ? "yes" : "no");
+
+// 10. false ? "yes" : "no"
+// Prediction: "no"
+// Why: condition is false, so the second branch runs
+console.log(10, false ? "yes" : "no");
+
+// // ==========================================
+// PART A: GRADE CHAIN (Fixed)
+// ==========================================
+
+// Test all eight scores as specified
+const scores = [95, 82, 73, 65, 54, 42, 0, 100];
+
+scores.forEach(score => {
+    const grade = score >= 90 ? "A"
+                : score >= 80 ? "B"
+                : score >= 70 ? "C"
+                : score >= 60 ? "D"
+                : score >= 50 ? "E"   // <- This was missing
+                : "F";
+    console.log(`Score ${score} → Grade ${grade}`);
+});
+
+/*
+Output:
+Score 95 → Grade A
+Score 82 → Grade B
+Score 73 → Grade C
+Score 65 → Grade D
+Score 54 → Grade E
+Score 42 → Grade F
+Score 0 → Grade F
+Score 100 → Grade A
+*/
+
+
+// ==========================================
+// PART B: DEFAULTS WITH || AND ?? (Fixed)
+// ==========================================
+
+// User 1: all fields missing
+const user1 = {
+    displayName: undefined,
+    theme: undefined,
+    maxResults: undefined,
+    lastLogin: undefined,
+    notificationCount: undefined,
+};
+
+// User 2: notificationCount is 0, theme is empty string
+const user2 = {
+    displayName: "",
+    theme: "",
+    maxResults: null,
+    lastLogin: null,
+    notificationCount: 0,
+};
+
+function parseUserProfile(user) {
+    // Using || for displayName (empty string should fall back to Guest)
+    const displayName = user.displayName || "Guest User";
+    
+    // Using || for theme (empty string should fall back to light)
+    const theme = user.theme || "light";
+    
+    // Using || for maxResults
+    const maxResults = user.maxResults || 10;
+    
+    // Using ?? for lastLogin (only null/undefined trigger fallback)
+    const lastLogin = user.lastLogin ?? "Never";
+    
+    // Using ?? for notificationCount (0 is valid, should NOT fall back)
+    const notificationCount = user.notificationCount ?? 0;
+
+    return { displayName, theme, maxResults, lastLogin, notificationCount };
+}
+
+console.log("User 1:", parseUserProfile(user1));
+console.log("User 2:", parseUserProfile(user2));
+
+/*
+Output:
+User 1: { displayName: 'Guest User', theme: 'light', maxResults: 10, lastLogin: 'Never', notificationCount: 0 }
+
+User 2: { displayName: 'Guest User', theme: 'light', maxResults: 10, lastLogin: 'Never', notificationCount: 0 }
+
+Why || and ?? behave differently for user2:
+
+For user2, theme is an empty string "". Using || returns "light" because 
+"" is falsy. But ?? would return "" because empty string is not null/undefined.
+
+For notificationCount = 0: || would return the fallback (since 0 is falsy), 
+but ?? correctly keeps 0 because 0 is a valid value, not nullish.
+
+This is why ?? is safer for numbers and empty strings — it only kicks in for 
+null or undefined, not for every falsy value.
+*/
+
+
+// ==========================================
+// PART C: NESTED PROPERTY ACCESS (Fixed)
+// ==========================================
+
+// Technique 1: && guard clauses
+function getCity1(user) {
+    return user && user.address && user.address.city;
+}
+
+// Technique 2: optional chaining
+function getCity2(user) {
+    return user?.address?.city;
+}
+
+// Technique 3: optional chaining with default
+function getCity3(user) {
+    return user?.address?.city ?? "Unknown city";
+}
+
+// Test objects
+const fullUser = { name: "Thabo", address: { city: "Johannesburg" } };
+const noAddress = { name: "Lerato" };
+const nullUser = null;
+
+console.log("--- Technique 1 (&&) ---");
+console.log(getCity1(fullUser));   // "Johannesburg"
+console.log(getCity1(noAddress));  // undefined (because user.address is undefined, short-circuits)
+console.log(getCity1(nullUser));   // null (because user is null, returns user itself)
+
+console.log("--- Technique 2 (?.) ---");
+console.log(getCity2(fullUser));   // "Johannesburg"
+console.log(getCity2(noAddress));  // undefined
+console.log(getCity2(nullUser));   // undefined
+
+console.log("--- Technique 3 (?., with ??) ---");
+console.log(getCity3(fullUser));   // "Johannesburg"
+console.log(getCity3(noAddress));  // "Unknown city"
+console.log(getCity3(nullUser));   // "Unknown city"
+
+/*
+Key difference between the three techniques:
+
+Technique 1 (&&): Works, but if user is null, it returns null (not undefined).
+It also fails if any intermediate property is 0 or "" (but we don't have that here).
+
+Technique 2 (?.): Cleanest syntax. Always returns undefined if the chain breaks,
+regardless of whether it's the user, address, or city that's missing.
+
+Technique 3 (?. with ??): Same as technique 2, but provides a fallback value.
+This is the safest for user-facing output.
+*/ 
