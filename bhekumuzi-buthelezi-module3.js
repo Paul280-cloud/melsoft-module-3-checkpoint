@@ -577,3 +577,95 @@ R15,750.33 as a float — they store it as 1575033 cents and do integer math, th
 divide by 100 at the very end. If you're building anything that actually handles
 money, you do it in cents, not decimals.
 */
+// ==========================================
+// CHALLENGE 6 - BITWISE PERMISSIONS
+// ==========================================
+
+const READ = 1;    // 0001
+const WRITE = 2;   // 0010
+const DELETE = 4;  // 0100
+const ADMIN = 8;   // 1000
+
+// Helper to show decimal and binary side by side
+function show(label, value) {
+    const binary = value.toString(2).padStart(4, "0");
+    console.log(`${label}: ${value} (binary ${binary})`);
+}
+
+// 1. User with READ + WRITE
+const userPerms = READ | WRITE;
+show("User permissions", userPerms);          // 3 (binary 0011)
+
+// 2. Admin with all permissions
+const adminPerms = READ | WRITE | DELETE | ADMIN;
+show("Admin permissions", adminPerms);        // 15 (binary 1111)
+
+// 3. Check if user has READ
+console.log("Has READ:", (userPerms & READ) ? "Yes" : "No");     // Yes
+
+// 4. Check if user has DELETE
+console.log("Has DELETE:", (userPerms & DELETE) ? "Yes" : "No"); // No
+
+// 5. Grant DELETE to first user
+let updatedUser = userPerms | DELETE;
+show("After granting DELETE", updatedUser);   // 7 (binary 0111)
+
+// 6. Revoke WRITE from first user
+updatedUser &= ~WRITE;
+show("After revoking WRITE", updatedUser);    // 5 (binary 0101)
+
+// 7. Toggle ADMIN twice with XOR
+let toggled = updatedUser ^ ADMIN;
+show("After 1st ADMIN toggle", toggled);      // 13 (binary 1101)
+toggled = toggled ^ ADMIN;
+show("After 2nd ADMIN toggle", toggled);      // 5 (binary 0101) — back to original
+
+// 8. SUPER_ADMIN as next power of 2
+const SUPER_ADMIN = ADMIN << 1;
+show("SUPER_ADMIN", SUPER_ADMIN);             // 16 (binary 10000)
+
+// Bonus: SUPER_ADMIN with all permissions
+const superAdminPerms = adminPerms | SUPER_ADMIN;
+show("Super admin (all + SUPER)", superAdminPerms); // 31 (binary 11111)
+
+
+/* ==========================================
+   INTERVIEW ANSWERS — BITWISE PERMISSIONS
+   ==========================================
+
+1. Why use bitwise flags instead of an array?
+
+   Two reasons.
+
+   First, memory. One number holds up to 31 permissions. An array of strings
+   doesn't. If you have thousands of users and you're checking permissions on
+   every request, that matters.
+
+   Second, speed. Checking a permission is one & operation. With an array
+   you'd have to loop or call includes(). Not a huge difference by itself,
+   but in a busy system it adds up.
+
+   Also, one integer is easy to store in a database or send over a network.
+   An array needs converting every time.
+
+2. What's the downside? When would you not use it?
+
+   Readability. If you see permissions = 13, that means nothing until you do
+   the math. With ['read', 'delete', 'admin'] you just read it. New devs on
+   the team have to learn the bit math before they can debug anything.
+
+   I also wouldn't use it if there are more than 31 permissions, because
+   JavaScript bitwise only works on 32-bit integers. And if permissions need
+   extra data — like who gave it or when it expires — bitwise can't hold that.
+
+3. Difference between &/| and &&/|| — where's the silent bug?
+
+   & and | work on the bits of a number. && and || work on truthy/falsy
+   values and return one of the operands.
+
+   If I write if (permissions && ADMIN) instead of if (permissions & ADMIN),
+   the check is wrong. A user with permissions = 2 is truthy, so the if
+   passes. That's a permission bypass that wouldn't throw any error. That's
+   the dangerous part. A typo you'd catch. A permission bypass you might not
+   find for a long time.
+*/
